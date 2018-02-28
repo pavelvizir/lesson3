@@ -1,0 +1,18 @@
+'''create repo lesson2 on github with 'Initialize' option.
+mkdir -p ~/projects/lesson2
+cd ~/projects/lesson2
+git clone https://github.com/pavelvizir/lesson2 .
+python3.5 -m venv .venv
+source .venv/bin/activate
+echo -e ".venv\n.swp" > .gitignore
+git add .
+git commit -m "Initial commit. .gitignore creation"
+touch if_statement.py
+chmod +x if_statement_1_age.py
+vim if_statement_1_age.py
+''':!python %
+git add .
+git commit -m "Task #1 completed. File: if_statement_1_age.py"
+head -1 if_statement_1_age.py > if_statement_2_string_compare.py
+...
+echo -e "bot_token.py\nbot.log\n*.pyc" >> .gitignore
