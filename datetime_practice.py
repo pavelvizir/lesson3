@@ -15,6 +15,7 @@ from dateutil.relativedelta import relativedelta
 def get_dates():
     '''1. Напечатайте в консоль даты: вчера, сегодня, месяц назад.'''
 
+    # Отличная возможность поиграть с .format, multiple return etc
     dates = {}
     dates["Сегодня"] = date.today()
     dates["Вчера"] = dates["Сегодня"] + timedelta(days=-1)
@@ -28,6 +29,7 @@ def get_dates():
 def convert_string_to_date(string=None):
     '''2. Превратите строку "01/01/17 12:10:03.234567" в объект datetime.'''
 
+    # Passing default argument value test
     if string is None:
         string = "01/01/17 12:10:03.234567"
 
