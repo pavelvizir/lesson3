@@ -1,9 +1,10 @@
 import geopy.distance, csv, json
 from math import sqrt
+from datetime import datetime #, timedelta
 
 coords_1 = (52.2296756, 21.0122287)
 coords_2 = (52.406374, 16.9251681)
-
+w1 = datetime.now()
 #print geopy.distance.vincenty(coords_1, coords_2).km
 #geopy.distance.VincentyDistance(coords_1, coords_2).km
 file_name_bus = 'data-398-2018-02-13.csv'
@@ -16,7 +17,7 @@ with open(file_name_bus, 'r', encoding=enc) as file:
 			bus_coord[line[0]] = (line[2], line[3])
 
 	bus_coord.pop('ID')
-	print(len(bus_coord), bus_coord['65'])
+#	print(len(bus_coord), bus_coord['65'])
 
 
 file_name_metro='data-397-2018-02-27.json'
@@ -53,7 +54,7 @@ for station, coord_list in metro_coord.items():
 #			print(c)
 
 	for exit in coord_list:
-		print(station, exit)
+		#print(station, exit)
 		for bus_stop_id, bus_stop_coord in c.items():
 #		for bus_stop_id, bus_stop_coord in bus_coord.items():
 			if sqrt((exit[0] - float(bus_stop_coord[0]))**2 + (exit[1] - float(bus_stop_coord[1]))**2) < 0.0057:
@@ -74,9 +75,9 @@ for station, coord_list in metro_coord.items():
 		a.clear()
 
 
-	print(len(bus_coord))
+#	print(len(bus_coord))
 
-print(len(bus_coord))
+#print(len(bus_coord))
 r = 0
 #o = max_station_list.copy()
 for t1,t2 in max_station_list.items():
@@ -90,8 +91,11 @@ for t1,t2 in max_station_list.items():
 		r2 = t1
 #		del o[t1]
 
-inv = {v:k for k, v in max_station_list.items()}
-print(max(max_station_list.values()), inv[max(max_station_list.values())])
+#inv = {v:k for k, v in max_station_list.items()}
+#print(max(max_station_list.values()), inv[max(max_station_list.values())])
+w2 = datetime.now()
+print(w2-w1)
+print(len(bus_coord))
 print(r2, r)
 #	print(geopy.distance.VincentyDistance(bus_coord['65'], metro_coord[]).km)
 # 			for a in line['RepairOfEscalators']:
