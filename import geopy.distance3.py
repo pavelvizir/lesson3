@@ -1,4 +1,5 @@
-import geopy.distance, csv, json
+import  csv, json #geopy.distance,
+from geopy.distance import great_circle, VincentyDistance
 from math import sqrt
 from datetime import datetime #, timedelta
 
@@ -13,10 +14,11 @@ enc = 'windows-1251'
 with open(file_name_bus, 'r', encoding=enc) as file:
 	reader = csv.reader(file, delimiter=delim)
 	bus_coord = {}
+	next(reader)
 	for line in reader:
-			bus_coord[line[0]] = (line[2], line[3])
+			bus_coord[line[0]] = (float(line[2]), float(line[3]))
 
-	bus_coord.pop('ID')
+#	bus_coord.pop('ID')
 #	print(len(bus_coord), bus_coord['65'])
 
 
@@ -42,41 +44,38 @@ with open(file_name_metro, 'r', encoding=enc) as file:
 			break
 
 		i+=1
-
+		
+w2 =    datetime.now()
 a = []
 max_station_list = {}
+c =    {}
 for station, coord_list in metro_coord.items():
-	c = {}
-	max_station_list[station] = 0
-	for bus_stop_id, bus_stop_coord in bus_coord.items():
-		if sqrt((coord_list[0][0] - float(bus_stop_coord[0]))**2 + (coord_list[0][1] - float(bus_stop_coord[1]))**2) < 0.012:
-			c[bus_stop_id] = bus_stop_coord
-#			print(c)
-
-	for exit in coord_list:
-		#print(station, exit)
-		for bus_stop_id, bus_stop_coord in c.items():
-#		for bus_stop_id, bus_stop_coord in bus_coord.items():
-			if sqrt((exit[0] - float(bus_stop_coord[0]))**2 + (exit[1] - float(bus_stop_coord[1]))**2) < 0.0057:
-				if geopy.distance.VincentyDistance(bus_stop_coord, exit).m <= 500:
-					#print(bus_stop_coord)
-					#print(sqrt((exit[0] - float(bus_stop_coord[0]))**2 + (exit[1] - float(bus_stop_coord[1]))**2))
-					#print(geopy.distance.VincentyDistance(bus_stop_coord, exit).m)
-					#print(bus_stop_id)
-					a.append(bus_stop_id)
-					max_station_list[station]+=1
-	#				del bus_coord[bus_stop_id]
-	#				pass
+    #c = {}
+    max_station_list[station] = 0
+    for bus_stop_id, bus_stop_coord in bus_coord.items():
+        if sqrt((coord_list[0][0] - bus_stop_coord[0])**2 + (coord_list[0][1] - bus_stop_coord[1])**2) < 0.012:
+            c[bus_stop_id] = bus_stop_coord
 			
-		for b in a:
-			del c[b]
-			del bus_coord[b]
+    for exit in coord_list:
+        #print(station, exit)
+        for bus_stop_id, bus_stop_coord in c.items():
+#		for bus_stop_id, bus_stop_coord in bus_coord.items():
+            if sqrt((exit[0] - bus_stop_coord[0])**2 + (exit[1] - bus_stop_coord[1])**2) < 0.0057:
+                if VincentyDistance(bus_stop_coord, exit).m <= 500:
+                #if great_circle(bus_stop_coord, exit).m <= 500:
+                    a.append(bus_stop_id)
+                    max_station_list[station]+=1
+			
+        for b in a:
+            del c[b]
+            del bus_coord[b]
+            #a.remove(b)
 
-		a.clear()
-
+        a.clear()
+    c.clear()
 
 #	print(len(bus_coord))
-
+w3= datetime.now()
 #print(len(bus_coord))
 r = 0
 #o = max_station_list.copy()
@@ -93,8 +92,8 @@ for t1,t2 in max_station_list.items():
 
 #inv = {v:k for k, v in max_station_list.items()}
 #print(max(max_station_list.values()), inv[max(max_station_list.values())])
-w2 = datetime.now()
-print(w2-w1)
+w4 = datetime.now()
+print(w2-w1, w3-w2, w4 - w3)
 print(len(bus_coord))
 print(r2, r)
 #	print(geopy.distance.VincentyDistance(bus_coord['65'], metro_coord[]).km)
