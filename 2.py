@@ -10,6 +10,7 @@ from csv import reader
 from json import loads
 
 from geopy.distance import VincentyDistance
+#from math import abs
 
 file_name_bus = 'data-398-2018-02-13.csv'
 file_name_metro = 'data-397-2018-02-27.json'
@@ -47,18 +48,25 @@ def get_metro_exits(file_name, encoding):
 def get_max_bus_stops(metro_coord, bus_coord):
     ''' Возвращает максимальное количество остановок
         и список станций в отформатированном виде. '''
+    lat_m = 500/111000
+    lon_m = 500/63000
     result = list([0, ])
     counted_for_station = set()
 
     for station, coord_list in metro_coord.items():
         counter = 0
+        print(station)
 
         for station_exit in coord_list:
+            slat =    station_exit[1]
+            slon =    station_exit[0]
             for bus_stop_coord in bus_coord:
-                if bus_stop_coord not in counted_for_station:
-                    if VincentyDistance(bus_stop_coord, station_exit).m <= 500:
-                        counted_for_station.add(bus_stop_coord)
-                        counter += 1
+                if abs(bus_stop_coord[0] - slon) < lon_m:
+                    #if  abs(bus_stop_coord[1] - slat) < lat_m:
+                        if bus_stop_coord not in counted_for_station:
+                            if VincentyDistance(bus_stop_coord, station_exit).m <= 500:
+                                counted_for_station.add(bus_stop_coord)
+                                counter += 1
         counted_for_station.clear()
 
         if counter > result[0]:
@@ -73,5 +81,14 @@ def get_max_bus_stops(metro_coord, bus_coord):
 
 bus_stops = get_bus_stops(file_name_bus, enc, delim)
 metro_exits = get_metro_exits(file_name_metro, enc)
-max_bus_stop = get_max_bus_stops(metro_exits, bus_stops)
-print(max_bus_stop)
+#max_bus_stop = get_max_bus_stops(metro_exits, bus_stops)
+#print(max_bus_stop)
+for i in bus_stops:
+    print(i)
+    break
+    
+for e in metro_exits.values():
+    print(e[0])
+    break
+    
+print(VincentyDistance((37,55),(38,55)).m)
