@@ -73,7 +73,7 @@ def get_max_bus_stops(metro_coord, bus_coord):
 #                if hypot(e_lon - bus_stop_coord[0],
 #                         e_lat - bus_stop_coord[1]) < 0.0057:
 
-                    if bus_stop_coord not in a and VincentyDistance(bus_stop_coord, exit).m <= 500:
+                    if bus_stop_coord not in a and VincentyDistance(bus_stop_coord, exit).m <= 250:
                         a.append(bus_stop_coord)
                         # a.add(bus_stop_coord)
                         counter += 1
