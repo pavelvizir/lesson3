@@ -21,7 +21,7 @@ file_name_metro = 'data-397-2018-02-27.json'
 delim = ';'
 enc = 'windows-1251'
 #radius = 500
-radius = 1000
+radius = 1500
 
 
 def get_bus_stops(file_name, encoding, delimiter):
