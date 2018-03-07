@@ -11,7 +11,7 @@ from json import loads
 
 from geopy.distance import distance
 # from geopy.distance import VincentyDistance
-#from math import hypot
+from math import hypot
 #from itertools import permutations
 from datetime import datetime
 from operator import itemgetter
@@ -20,8 +20,8 @@ file_name_bus = 'data-398-2018-02-13.csv'
 file_name_metro = 'data-397-2018-02-27.json'
 delim = ';'
 enc = 'windows-1251'
-radius = 500
-#radius = 1000
+#radius = 500
+radius = 2500
 
 
 def get_bus_stops(file_name, encoding, delimiter):
@@ -80,7 +80,8 @@ def get_max_bus_stops(metro, bus):
                     busa.add((a1, b1))
                 else:
                     break
-           
+                    
+              #  print(lat_m, lon_m)
 #        for a2, b2 in busa:
    #         if b2 >= minb - lon_m and b2 <= maxb + lon_m:
              #       busb .add((a2, b2))
@@ -98,6 +99,7 @@ def get_max_bus_stops(metro, bus):
                      #   abs(lat_diff) < lat_m and
                         abs(bus_stop_coord[1] - slon) < lon_m and
                         bus_stop_coord not in counted_for_station and
+                        not hypot(((bus_stop_coord[0] - slat)*110500),((bus_stop_coord[1] - slon)*radius/lon_m)) >    radius and
                         distance(bus_stop_coord, station_exit).m <= radius
                 ):
                     counted_for_station.add(bus_stop_coord)
@@ -120,7 +122,8 @@ bus_stops = get_bus_stops(file_name_bus, enc, delim)
 #w2=    datetime.now()
 metro_exits = get_metro_exits(file_name_metro, enc)
 #w3 =    datetime.now()
+w1 =    datetime.now()
 max_bus_stop = get_max_bus_stops(metro_exits, bus_stops)
 #print(max_bus_stop, datetime.now() - w3, w3 - w2, w2 - w1)
-print(max_bus_stop)
+print(max_bus_stop, datetime.now() - w1)
 #print(bus_stops)
