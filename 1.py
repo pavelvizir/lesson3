@@ -22,7 +22,7 @@ def get_bus_stops(file_name, encoding, delim):
     with open(file_name, 'r', encoding=encoding) as file:
         content = reader(file, delimiter=delim)
         next(content)
-        result = set((float(line[2]), float(line[3])) for line in content)
+        result = set((float(line[3]), float(line[2])) for line in content)
 
         return result
 
@@ -38,10 +38,10 @@ def get_metro_exits(file_name, encoding):
             lon, lat = line['geoData']['coordinates']
             station = line['NameOfStation']
             try:
-                result[station].append((lon, lat))
+                result[station].append((lat, lon))
             except KeyError:
                 result[station] = [
-                    (lon, lat),
+                    (lat, lon),
                 ]
 
 
@@ -73,7 +73,7 @@ def get_max_bus_stops(metro_coord, bus_coord):
 #                if hypot(e_lon - bus_stop_coord[0],
 #                         e_lat - bus_stop_coord[1]) < 0.0057:
 
-                    if bus_stop_coord not in a and VincentyDistance(bus_stop_coord, exit).m <= 250:
+                    if bus_stop_coord not in a and VincentyDistance(bus_stop_coord, exit).m <= 500:
                         a.append(bus_stop_coord)
                         # a.add(bus_stop_coord)
                         counter += 1
@@ -92,7 +92,7 @@ def get_max_bus_stops(metro_coord, bus_coord):
         elif counter == max_station_list[0]:
             max_station_list[1].append(station)
         i+=1
-
+        break
     return max_station_list
 
 

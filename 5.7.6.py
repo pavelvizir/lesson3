@@ -85,7 +85,7 @@ def get_max_bus_stops(metro, bus):
     # 111699
     result = [0, []]
     counted_for_station = set()
-
+    counter_2 = 0
     for station, station_coord_list in metro.items():
         counter = 0
         bus_reduced = set()
@@ -118,11 +118,16 @@ def get_max_bus_stops(metro, bus):
                         # if distance(bus_stop, station_exit).m <= radius:
                         #    print('fuck')
                         continue
-                    elif hypot(((bus_lat - exit_lat) / lower_lat_m), ((bus_lon - exit_lon) / lower_lon_m)) < radius or distance(bus_stop, station_exit).m <= radius:
+                    elif hypot(((bus_lat - exit_lat) / lower_lat_m), ((bus_lon - exit_lon) / lower_lon_m)) < radius:
                         # if distance(bus_stop, station_exit).m > radius:
                         #    print('fuck')
                         counted_for_station.add(bus_stop)
                         counter += 1
+                    elif distance(bus_stop, station_exit).m <= radius:
+                        counter_2 +=1
+                        counted_for_station.add(bus_stop)
+                        counter += 1
+
                 # else:
                 #    if bus_stop not in counted_for_station:
                 #        if distance(bus_stop, station_exit).m <= radius:
@@ -140,7 +145,7 @@ def get_max_bus_stops(metro, bus):
     fresult = 'В радиусе {} {} от выходов из метро больше всего автобусных остановок ({}) на {} метро {}.'.format(
         radius, 'метров' if radius > 1 else 'метра', result[0], 'станциях'
         if len(result[1]) > 1 else 'станции', ', '.join(result[1]))
-
+    print(counter_2)
     return fresult
 
 
