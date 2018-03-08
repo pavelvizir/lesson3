@@ -51,39 +51,16 @@ def get_metro_exits(file_name, encoding):
 def get_max_bus_stops(metro_coord, bus_coord):
     global w3
     w3 = datetime.now()
-    max_station_list = [
-        0,
-    ]
-    i = 1
+    max_station_list = [0, []]
     for station, coord_list in metro_coord.items():
-#        if i > 19:
-#            break
-
         counter = 0
         a = []
- #       a = set()
-   #     m_lon, m_lat = coord_list[0]
- #       c = set((lon, lat) for lon, lat in bus_coord
-  #              if hypot(m_lon - lon, m_lat - lat) < 0.012)
-
         for exit in coord_list:
-#            e_lon, e_lat = exit
-
             for bus_stop_coord in bus_coord:
-#                if hypot(e_lon - bus_stop_coord[0],
-#                         e_lat - bus_stop_coord[1]) < 0.0057:
-
                     if bus_stop_coord not in a and VincentyDistance(bus_stop_coord, exit).m <= 2500:
                         a.append(bus_stop_coord)
-                        # a.add(bus_stop_coord)
                         counter += 1
-
-#            for b in a:
- #               c.remove(b)
- #               bus_coord.remove(b)
-
         a.clear()
-
         if counter > max_station_list[0]:
             max_station_list.clear()
             max_station_list.extend([counter, [
@@ -91,8 +68,6 @@ def get_max_bus_stops(metro_coord, bus_coord):
             ]])
         elif counter == max_station_list[0]:
             max_station_list[1].append(station)
-        i+=1
-#        break
     return max_station_list
 
 
