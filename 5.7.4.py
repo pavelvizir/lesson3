@@ -122,7 +122,6 @@ def get_max_bus_stops(metro, bus):
         elif counter == result[0]:
             result[1].append(station)
             
-        break
     fresult = 'В радиусе {} {} от выходов из метро больше всего автобусных остановок ({}) на {} метро {}.'.format(
             radius, 'метров' if radius >1 else 'метра', result[0], 'станциях' if len(result[1]) > 1 else 'станции', ', '.join(result[1]))
     return fresult

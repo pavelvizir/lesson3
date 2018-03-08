@@ -26,7 +26,7 @@ file_name_bus = 'data-398-2018-02-13.csv'
 file_name_metro = 'data-397-2018-02-27.json'
 delim = ';'
 enc = 'windows-1251'
-radius = 500
+radius = 2500
 rounding = 0.001
 
 def get_bus_stops(file_name, encoding, delimiter):
