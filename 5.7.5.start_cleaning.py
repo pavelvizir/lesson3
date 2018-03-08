@@ -27,7 +27,7 @@ file_name_metro = 'data-397-2018-02-27.json'
 delim = ';'
 enc = 'windows-1251'
 # radius = 500
-radius = 10
+radius = 900
 
 
 def get_bus_stops(file_name, encoding, delimiter):
@@ -62,6 +62,7 @@ def get_max_bus_stops(metro, bus):
     ''' Возвращает максимальное количество остановок
         и список станций в отформатированном виде. '''
     max_lat = max([abs(lat) for lat, lon in bus])
+    min_lat! lon_x as well
     # Длина градуса долготы на верхней границе широт в словаре автобусов.
     lon_m = (radius + max(1, radius/100)) / distance((max_lat, 0), (max_lat, 1)).m
     lon_x = (radius - max(1, radius/100)) / distance((max_lat, 0), (max_lat, 1)).m
@@ -74,6 +75,7 @@ def get_max_bus_stops(metro, bus):
         counter = 0
         busa =    set()
         a = [a for a,b in coord_list]
+        !!!min max if len<2
         mina = min(a)
         maxa = max(a)
         for a1, b1 in bus:
