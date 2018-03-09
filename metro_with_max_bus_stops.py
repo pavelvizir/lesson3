@@ -5,25 +5,27 @@
     Объединить наборы данных из предыдущих задач и посчитать,
     у какой станции метро больше всего остановок (в радиусе 0.5 км).
 
-    TODO:
-    0 метров
-    positive integer
-    sort station results
-    вынести метр наружу
-    0 станций обработать
-    copy basic function here as well, for reference
-    аремя отработки функций выводить
-    описать, что принимает на вход.
-    передача радиуса и округления внутрь.
-    сократить один if with and
+Комментарий:
+
+Первая реализация функции (get_max_bus_stops_slow) работала
+очень медленно. На допотопном ноуте 20мин. Сделал быструю версию и всё
+для её тестирования. Ускорение вышло на несколько порядков. Даже на мобиле
+теперь за секунды.
+
+Пересчитывать координаты точно (Винсенти) очень дорого. Заменил большую
+часть вычислений на простые + уменьшаю кол-во элементов для перебора.
+Вначале банальным вычитанием и сравнением отсекается большая часть
+координат, затем подсчётом длины отрезка (hypot). В итоге считать точно
+надо лишь несколько пар координат.
 '''
 
+
 from csv import reader
-from datetime import datetime
+from datetime import datetime, timedelta
+from random import choice, sample, uniform, randrange
 from json import loads
 from math import hypot
 from geopy.distance import distance
-from random import choice, sample
 
 
 def get_bus_stops(file_name, encoding, delimiter):
@@ -74,6 +76,9 @@ def get_max_bus_stops_slow(bus, metro, radius):
             result.extend([counter, [station, ]])
         elif counter == result[0]:
             result[1].append(station)
+    if result[0] == 0:
+        return 'С заданными параметрами ничего не нашлось'
+
     text_result = '''В радиусе {} {} от выходов из метро больше всего автобусных\
  остановок ({}) у {} метро {}.'''.format(
      radius,
@@ -87,7 +92,10 @@ def get_max_bus_stops_slow(bus, metro, radius):
 
 def get_max_bus_stops_fast(bus, metro, radius, rounding=0.001):
     ''' Возвращает максимальное количество остановок
-        и список станций в отформатированном виде. '''
+        и список станций в отформатированном виде.
+        Приниамет на вход отсортированый набор
+        координат автобусных остановок.
+    '''
     # Результат в виде макс. кол-ва остановок и списка станций,
     # если таких больше одной.
     result = [0, []]
@@ -115,6 +123,11 @@ def get_max_bus_stops_fast(bus, metro, radius, rounding=0.001):
     # Т.е. получаем такую часть градуса долготы, которая
     # гарантированно будет меньше метра.
     # Аналогично верхнее значение и верхний долготный радиус.
+    #
+    # Область (0,0) (1,1) на земле представляет собой трапецию
+    # с округлыми сторонами и слегка выгнутыми основаниями.
+    # Ниже вводятся поправки, которые позволяют работать с большей частью
+    # поверхности как c прямоугольником.
     lower_lon_m = (1 / distance((min_bus_lat, 0), (min_bus_lat, 1)).m)\
         * (1 - rounding)
     upper_lon_m = (1 / distance((max_bus_lat, 0), (max_bus_lat, 1)).m)\
@@ -194,6 +207,8 @@ def get_max_bus_stops_fast(bus, metro, radius, rounding=0.001):
         elif counter == result[0]:
             result[1].append(station)
     # Всё посчитано, форматируем вывод.
+    if result[0] == 0:
+        return 'С заданными параметрами ничего не нашлось'
     text_result = '''В радиусе {} {} от выходов из метро больше всего автобусных\
  остановок ({}) у {} метро {}.'''.format(
      radius,
@@ -203,6 +218,8 @@ def get_max_bus_stops_fast(bus, metro, radius, rounding=0.001):
      ', '.join(sorted(result[1])))
 
     return text_result
+
+# Ничего не успеваю, далее Содом и Гоморра.
 
 
 def load_data(file_bus, file_metro, encoding, delimiter):
@@ -222,30 +239,56 @@ def load_data(file_bus, file_metro, encoding, delimiter):
     return bus, metro, result
 
 
-def get_max_bus_stops_wrapper(bus, metro, mode='fast', rounding=0.001, radius=500):
+def get_max_bus_stops_wrapper(bus, metro, mode='fast', radius=500, rounding=0.001):
     ''' Запускает нужную функцию или тест. '''
-#    rouding = rouding or
-    def test_run(bus, metro, radiusm, rouding, accumulate_totals=None):
-        metro_reduced = {k: metro[k] for k in sample(list(metro.keys()), 2)}
+    # Спагетти продолжается.
+    total_fast = timedelta(0)
+    total_slow = timedelta(0)
+    total_runs = 0
+    def test_run(bus, metro, radius, rounding, accumulate_totals=False):
+        ''' Запускает тест с 2-3 станциями. '''
+        failed = False
+        metro_reduced = {k: metro[k] for k in sample(list(metro.keys()), choice([2,3]))}
+        if accumulate_totals:
+            rounding = uniform(0.001, 0.000001)
+            radius = randrange(0, 1000)
         time_1 = datetime.now()
         result_fast = get_max_bus_stops_fast(bus, metro_reduced, radius, rounding)
         time_2 = datetime.now()
         result_slow = get_max_bus_stops_slow(bus, metro_reduced, radius)
         time_3 = datetime.now()
         if result_fast == result_slow:
-            result = 'Test passed.\nRounding: {}\nStations were: {}\n{}'.format(rounding, ', '.join(metro_reduced), result_fast)
+            result = 'Test passed.\nRounding: {}\nStations were: {}\n{}'\
+                    .format(rounding, ', '.join(metro_reduced), result_fast)
         else:
-            result = 'Test failed.\nRounding: {}\nStations were: {}\n Results were:\n\t\
-                    Fast:\n\t{}\nSlow:\n\t{}'.format(rounding, ', '.join(metro_reduced), result_fast, result_slow)
+            result = 'Test failed.\nRounding: {}\nStations were: {}\n Results\
+ were:\n\t\Fast:\n\t{}\nSlow:\n\t{}'.format(rounding, ', '.join(metro_reduced),
+                                            result_fast, result_slow)
+            failed = True
+        fast_time = time_2 - time_1
+        slow_time = time_3 - time_2
         result += '\n'.join([
             '\n Time taken:',
-            '\t{:10}{}'.format('Fast:', time_2 - time_1),
-            '\t{:10}{}'.format('Slow:', time_3 - time_2),
-#            '\t{:10}{}'.format('Total:', time_3 - time_1),
-            '\t{:16}{}\n'.format('Rate:', int((time_3 - time_2)/(time_2-time_1)))])
-        if accumulate_totals == 'accumulate_totals':
-
-            result += 
+            '\t{:10}{}'.format('Fast:', fast_time),
+            '\t{:10}{}'.format('Slow:', slow_time),
+            '\t{:16}{}\n'.format('Rate:', int(slow_time/fast_time))])
+        if accumulate_totals:
+            nonlocal total_runs
+            nonlocal total_fast
+            nonlocal total_slow
+            total_runs += 1
+            total_fast += fast_time
+            total_slow += slow_time
+            result += '\n'.join([
+                '\n Totals:',
+                '\t{:16}{}'.format('Runs:', total_runs),
+                '\t{:10}{}'.format('Fast:', total_fast),
+                '\t{:10}{}'.format('Slow:', total_slow),
+                '\t{:16}{}\n'.format('Rate:',
+                                     int(total_slow / total_fast))])
+            if failed:
+                print(result)
+                quit()
 
         return result
 
@@ -262,10 +305,26 @@ def get_max_bus_stops_wrapper(bus, metro, mode='fast', rounding=0.001, radius=50
     elif mode == 'test_unlimited':
         while True:
             result = test_run(bus, metro, radius, rounding, 'accumulate_totals')
+            print(result)
 
     else:
         result = 'Unknown mode. Doing nothing.'
 
+    return result
+
+
+def get_help():
+    ''' Prints help. '''
+    # Не до красоты :-(
+    result = '\n'.join(sorted(['h - help',
+                               'q - quit',
+                               'r - reload data',
+                               't - run test',
+                               'u - run unlimited test',
+                               'radius - set new radius',
+                               'rounding - set new rounding',
+                               'f - run fast calculation',
+                               's - run slow calculation']))
     return result
 
 
@@ -274,16 +333,36 @@ if __name__ == "__main__":
     file_name_metro = 'data-397-2018-02-27.json'
     enc = 'windows-1251'
     delim = ';'
-#    rounding = 0.001
+    rounding = 0.001
+    radius = 500
     bus_stops, metro_exits, load_data_result =\
         load_data(file_name_bus, file_name_metro, enc, delim)
     print(load_data_result)
-    print(get_max_bus_stops_wrapper(bus_stops, metro_exits))
-    print(get_max_bus_stops_wrapper(bus_stops, metro_exits, 'test', 0.00001))
-#    for i in range(20):
-#        print(get_max_bus_stops_wrapper(bus_stops, metro_exits, 'test', 1000))
+    print('Welcome to primitive interface!')
+    print(get_help())
+    # Обработку оставлю на потом. Пока что - не ошибаться при вводе :-)
+    while True:
+        user = input('Enter command:\n')
+        if user == 'h':
+            print(get_help())
+        elif user == 'q':
+            break
+        elif user == 'r':
+            bus_stops, metro_exits, load_data_result =\
+                load_data(file_name_bus, file_name_metro, enc, delim)
+            print(load_data_result)
+        elif user == 't':
+            print(get_max_bus_stops_wrapper(bus_stops, metro_exits, 'test', radius, rounding))
+        elif user == 'u':
+            print('Press Ctrl-C to exit')
+            get_max_bus_stops_wrapper(bus_stops, metro_exits, 'test_unlimited')
+        elif user == 'radius':
+            radius = int(input('Enter new radius:\n'))
+        elif user == 'rounding':
+            rounding = float(input('Enter new rounding:\n'))
+        elif user == 'f':
+            print(get_max_bus_stops_wrapper(bus_stops, metro_exits, 'fast', radius, rounding))
+        elif user == 's':
+            print(get_max_bus_stops_wrapper(bus_stops, metro_exits, 'slow', radius, rounding))
 
-    bus_stops, metro_exits, load_data_result =\
-        load_data(file_name_bus, file_name_metro, enc, delim)
-    print(load_data_result)
-    print(get_max_bus_stops_wrapper(bus_stops, metro_exits, 'fast', 0.0001, 300))
+    print('See you!')
