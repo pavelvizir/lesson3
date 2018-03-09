@@ -30,8 +30,7 @@ def convert_string_to_date(string=None):
     '''2. Превратите строку "01/01/17 12:10:03.234567" в объект datetime.'''
 
     # Passing default argument value test
-    if string is None:
-        string = "01/01/17 12:10:03.234567"
+    string = string or "01/01/17 12:10:03.234567"
 
     return datetime.strptime(string, '%m/%d/%y %H:%M:%S.%f')
 

@@ -6,7 +6,7 @@
     2. Прочитайте его и подсчитайте количество слов в тексте.
 
 
-    TODO: regexp with more delimeters.
+    TODO: regexp with more delimeters, line by line.
 
 '''
 

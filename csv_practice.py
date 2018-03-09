@@ -5,6 +5,13 @@
     1. Возьмите словарь с ответами из функции get_answer
     2. Запишите его содержимое в формате csv в формате: "ключ"; "значение".
         Каждая пара ключ-значение должна располагаться на отдельной строке.
+
+Комментарий:
+    Альтернатива:
+        with open(file_name, 'w', encoding='utf-8') as file:
+        writer = csv.writer(file, fields, delimiter=delim)
+        for question, answer in dictionary.items():
+            writer.writerow([question, answer])
 '''
 
 import csv

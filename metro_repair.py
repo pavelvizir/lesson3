@@ -1,44 +1,36 @@
+#!/usr/bin/env python
+'''
+Метро
+
+В этом задании требуется определить, на каких станциях московского метро сейчас
+идёт ремонт эскалаторов и вывести на экран их названия.
+
+Файл с данными можно скачать на странице
+http://data.mos.ru/opendata/624/row/1773539.
+
+'''
+
 import json
-from datetime import datetime  #, timedelta date, 
-file_name='data-397-2018-02-27.json'
-enc = 'windows-1251'
-#enc = 'utf-8'
-today = datetime.today()
-with open(file_name, 'r', encoding=enc) as file:
-	reader = json.loads(file.read())
-#	i = 1 
-	d = set()
-	for line in reader:
-		#print(line)
-		#if i < 5000:
-			#print(line.keys())
-			#if line['RepairOfEscalators']:
-			for a in line['RepairOfEscalators']:
-					#a = line.get('RepairOfEscalators')
-					#if not a:
-					#print(line)
-					#continue
+from datetime import datetime
 
-					#else:
-				if a:
-					b = a['RepairOfEscalators'].split('-')
-				#print(b)
-				#strptime(b[0], '%d.%m.%Y')
-					if datetime.strptime(b[0], '%d.%m.%Y') <= today <= datetime.strptime(b[1], '%d.%m.%Y'):
-					#print(line['NameOfStation'], b)
-						d.add(line['NameOfStation'])
 
-			#else:
-			#	print(line['RepairOfEscalators'])
-			#	print(i)
-				#
+def get_metro_repair():
+    ''' Возвращает станции, где сейчас ремонт эскалаторов. '''
+    file_name = 'data-397-2018-02-27.json'
+    enc = 'windows-1251'
+    today = datetime.today()
+    with open(file_name, 'r', encoding=enc) as file:
+        reader = json.loads(file.read())
+        result = set()
+        for line in reader:
+            for escalator in line['RepairOfEscalators']:
+                if escalator:
+                    date_range = escalator['RepairOfEscalators'].split('-')
+                    if datetime.strptime(date_range[0], '%d.%m.%Y')\
+                            <= today <=\
+                            datetime.strptime(date_range[1], '%d.%m.%Y'):
+                        result.add(line['NameOfStation'])
+        return sorted(result)
 
-		#	i+=1
-			#print(line.keys())
-		#else:
-		#	break
-	#print(reader)
-	# for line in file:
-	# 	json.loads(line)
 
-	print(sorted(d))
+print(get_metro_repair())
