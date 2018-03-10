@@ -84,7 +84,7 @@ def get_max_bus_stops_slow(bus, metro, radius):
      radius,
      'метра' if radius == 1 else 'метров',
      result[0],
-     'станции' if not len(result[1]) > 1 else 'станциях',
+     'станции' if not len(result[1]) > 1 else 'станций',
      ', '.join(sorted(result[1])))
 
     return text_result
@@ -214,7 +214,7 @@ def get_max_bus_stops_fast(bus, metro, radius, rounding=0.001):
      radius,
      'метра' if radius == 1 else 'метров',
      result[0],
-     'станции' if not len(result[1]) > 1 else 'станциях',
+     'станции' if not len(result[1]) > 1 else 'станций',
      ', '.join(sorted(result[1])))
 
     return text_result
