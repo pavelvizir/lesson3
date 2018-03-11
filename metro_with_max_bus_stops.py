@@ -7,8 +7,9 @@
 
 Update:
     Оказалось, что под Windows тест не работает, так как точность
-    datetime.datetime.now() под Windows ~10-55ms :-( Надо будет сменить
-    на time.time() или что-то ещё. В Linux всё отлично.
+    datetime.datetime.now() под Windows ~10-55ms :-( В Linux всё отлично.
+    Сменил на вызов datime.fromtimestamp(perf_counter()). Теперь
+    самый интересный режим "u - test_unlimited" должен рабоать в Windows.
 
 Комментарий:
 
@@ -27,6 +28,7 @@ Update:
 
 from csv import reader
 from datetime import datetime, timedelta
+from time import perf_counter
 from random import choice, sample, uniform, randrange
 from json import loads
 from math import hypot
@@ -229,11 +231,11 @@ def get_max_bus_stops_fast(bus, metro, radius, rounding=0.001):
 
 def load_data(file_bus, file_metro, encoding, delimiter):
     ''' Загружает информацию из файлов. '''
-    time_1 = datetime.now()
+    time_1 = datetime.fromtimestamp(perf_counter())
     bus = get_bus_stops(file_bus, encoding, delimiter)
-    time_2 = datetime.now()
+    time_2 = datetime.fromtimestamp(perf_counter())
     metro = get_metro_exits(file_metro, encoding)
-    time_3 = datetime.now()
+    time_3 = datetime.fromtimestamp(perf_counter())
     # Не хочу пока обрабатывать ошибки. Предположим, что всё всегда ок.
     result = '\n'.join([
         'Data loading complete.\n Time taken:',
@@ -244,7 +246,8 @@ def load_data(file_bus, file_metro, encoding, delimiter):
     return bus, metro, result
 
 
-def get_max_bus_stops_wrapper(bus, metro, mode='fast', radius=500, rounding=0.001):
+def get_max_bus_stops_wrapper(bus, metro, mode='fast', radius=500,
+                              rounding=0.001):
     ''' Запускает нужную функцию или тест. '''
     # Спагетти продолжается.
     total_fast = timedelta(0)
@@ -253,15 +256,17 @@ def get_max_bus_stops_wrapper(bus, metro, mode='fast', radius=500, rounding=0.00
     def test_run(bus, metro, radius, rounding, accumulate_totals=False):
         ''' Запускает тест с 2-3 станциями. '''
         failed = False
-        metro_reduced = {k: metro[k] for k in sample(list(metro.keys()), choice([2,3]))}
+        metro_reduced = {k: metro[k] for k in sample(list(metro.keys()),
+                                                     choice([2, 3]))}
         if accumulate_totals:
             rounding = uniform(0.001, 0.000001)
             radius = randrange(0, 1000)
-        time_1 = datetime.now()
-        result_fast = get_max_bus_stops_fast(bus, metro_reduced, radius, rounding)
-        time_2 = datetime.now()
+        time_1 = datetime.fromtimestamp(perf_counter())
+        result_fast = get_max_bus_stops_fast(bus, metro_reduced, radius,
+                                             rounding)
+        time_2 = datetime.fromtimestamp(perf_counter())
         result_slow = get_max_bus_stops_slow(bus, metro_reduced, radius)
-        time_3 = datetime.now()
+        time_3 = datetime.fromtimestamp(perf_counter())
         if result_fast == result_slow:
             result = 'Test passed.\nRounding: {}\nStations were: {}\n{}'\
                     .format(rounding, ', '.join(metro_reduced), result_fast)
@@ -298,19 +303,25 @@ def get_max_bus_stops_wrapper(bus, metro, mode='fast', radius=500, rounding=0.00
         return result
 
     if mode == 'fast':
-        time_1 = datetime.now()
+        time_1 = datetime.fromtimestamp(perf_counter())
         result = get_max_bus_stops_fast(bus, metro, radius, rounding)
-        result += '\n Time taken: {}\n'.format(datetime.now() - time_1)
+        result += '\n Time taken: {}\n'.format(
+            datetime.fromtimestamp(perf_counter()) - time_1)
     elif mode == 'slow':
-        time_1 = datetime.now()
+        time_1 = datetime.fromtimestamp(perf_counter())
         result = get_max_bus_stops_slow(bus, metro, radius)
-        result += '\n Time taken: {}\n'.format(datetime.now() - time_1)
+        result += '\n Time taken: {}\n'.format(
+            datetime.fromtimestamp(perf_counter()) - time_1)
     elif mode == 'test':
         result = test_run(bus, metro, radius, rounding)
     elif mode == 'test_unlimited':
         while True:
-            result = test_run(bus, metro, radius, rounding, 'accumulate_totals')
-            print(result)
+            try:
+                result = test_run(bus, metro, radius, rounding,
+                                  'accumulate_totals')
+                print(result)
+            except KeyboardInterrupt:
+                break
 
     else:
         result = 'Unknown mode. Doing nothing.'
@@ -333,7 +344,9 @@ def get_help():
     return result
 
 
-if __name__ == "__main__":
+def primitive_interface():
+    ''' Primitive cli to run tests etc. '''
+
     file_name_bus = 'data-398-2018-02-13.csv'
     file_name_metro = 'data-397-2018-02-27.json'
     enc = 'windows-1251'
@@ -357,7 +370,8 @@ if __name__ == "__main__":
                 load_data(file_name_bus, file_name_metro, enc, delim)
             print(load_data_result)
         elif user == 't':
-            print(get_max_bus_stops_wrapper(bus_stops, metro_exits, 'test', radius, rounding))
+            print(get_max_bus_stops_wrapper(bus_stops, metro_exits, 'test',
+                  radius, rounding))
         elif user == 'u':
             print('Press Ctrl-C to exit')
             get_max_bus_stops_wrapper(bus_stops, metro_exits, 'test_unlimited')
@@ -366,8 +380,14 @@ if __name__ == "__main__":
         elif user == 'rounding':
             rounding = float(input('Enter new rounding:\n'))
         elif user == 'f':
-            print(get_max_bus_stops_wrapper(bus_stops, metro_exits, 'fast', radius, rounding))
+            print(get_max_bus_stops_wrapper(bus_stops, metro_exits, 'fast',
+                  radius, rounding))
         elif user == 's':
-            print(get_max_bus_stops_wrapper(bus_stops, metro_exits, 'slow', radius, rounding))
+            print(get_max_bus_stops_wrapper(bus_stops, metro_exits, 'slow',
+                  radius, rounding))
 
     print('See you!')
+
+
+if __name__ == "__main__":
+    primitive_interface()
